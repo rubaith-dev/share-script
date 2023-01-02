@@ -1,27 +1,28 @@
-import React, {
-  DragEvent,
-  useEffect,
-  useMemo,
-  useState,
-  useContext,
-  ChangeEvent,
-} from "react";
+import React, { DragEvent, useEffect, useContext, ChangeEvent } from "react";
 import Image from "next/image";
-// import Loader from "@/components/Shared/Loader";
-import { FileUploadContext, FileUploadContextType } from "@/pages";
-import axios from 'axios'
+import { FileType, ACTIONS } from "../../../utils/types/index";
+import { FileUploadContext } from "@/utils/reducers/index.r";
+import axios from "axios";
 
 type Props = {};
 
 const FileDropZone = (props: Props) => {
-  const { files, setFiles } = useContext(FileUploadContext);
+  const { files, dispatch } = useContext(FileUploadContext);
 
   const handleFileChange = async () => {
     const CHUNK_SIZE = 5 * 1024 * 1024; // Chunk size (5MB in this example)
 
-    const promises = files.map(async (file)=>{
+    const promises = files?.map(async ({ file, progress, id }) => {
+      if (!file) {
+        return;
+      }
+
+      
+
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-      const uploadPromises = Array.from({length : totalChunks }, async (_, index) =>{
+      let uploadedChunks = 0;
+      for (let index = 0; index < totalChunks; index++) {
+
         const start = index * CHUNK_SIZE;
         const end = Math.min((index + 1) * CHUNK_SIZE, file.size);
 
@@ -35,14 +36,20 @@ const FileDropZone = (props: Props) => {
 
         try {
           await axios.post("http://localhost:8000/upload", formData);
-          console.log(`Chunk ${index + 1} uploaded successfully.`);
+          uploadedChunks++;
+          dispatch({
+            type: ACTIONS.SET_PROGRESS,
+            payload: { id, progress: Number(uploadedChunks / totalChunks) },
+          });
+
+          console.log(
+            `Chunk ${index + 1} of ${totalChunks} uploaded successfully.`
+          );
         } catch (error) {
           console.error(`Failed to upload chunk ${index + 1}.`, error);
         }
-      } )
-
-      return Promise.race(uploadPromises)
-    })
+      }
+    });
 
     try {
       await Promise.all(promises);
@@ -65,19 +72,23 @@ const FileDropZone = (props: Props) => {
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     let inputFiles = e.dataTransfer.files;
-    let fileList: File[] = [];
+    let fileList: FileType[] = [];
     if (inputFiles && inputFiles.length > 0) {
-      Object.values(inputFiles).map((file) => fileList.push(file));
-      setFiles(fileList);
+      Object.values(inputFiles).map((file, index) => {
+        return fileList.push({ file, progress: 0, id: index + 1 });
+      });
+      dispatch({ type: ACTIONS.SET_FILES, payload: fileList });
     }
   };
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     let inputFiles = e.target.files;
-    let fileList: File[] = [];
+    let fileList: FileType[] = [];
     if (inputFiles && inputFiles.length > 0) {
-      Object.values(inputFiles).map((file) => fileList.push(file));
-      setFiles(fileList);
+      Object.values(inputFiles).map((file, index) =>
+        fileList.push({ file, progress: 0, id: index + 1 })
+      );
+      dispatch({ type: ACTIONS.SET_FILES, payload: fileList });
     }
   };
 

@@ -8,17 +8,6 @@ const FilePreviewModal = ({ className }: Props) => {
   const { files, setFiles } = useContext(FileUploadContext);
   const [progressbar, setProgressbar] = useState(100);
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setProgressbar((prevProgress) => {
-  //       const newProgress = prevProgress + 10;
-  //       return newProgress > 100 ? 0 : newProgress;
-  //     });
-  //   }, 500); // Adjust the interval time (in milliseconds) to control the speed of the progress bar animation
-
-  //   return () => clearInterval(interval);
-  // }, []);
-
   return (
     <div
       className={`${className} w-1/4 h-full bg-gray-900 z-30 text-white overflow-y-auto`}
