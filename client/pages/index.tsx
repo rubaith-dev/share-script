@@ -1,21 +1,54 @@
+import { DragEvent } from "react";
 import Image from "next/image";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+
+  const onDragOver = (e: DragEvent<HTMLDivElement>) =>{
+    e.preventDefault()
+    // console.log(e)
+  }
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) =>{
+    e.preventDefault()
+    console.log(e)
+  }
+
   return (
-    <section className="grid grid-cols-2">
-      <div className="border p-10">
-        <div className="border h-full"></div>
-      </div>
-      <div className="relative">
-        <Image
-          src="/undraw-upload.svg"
-          alt="Picture of file sharing"
-          fill
-          
-        />
+    <section className="flex justify-center items-center w-full h-screen md:px-20">
+      <div className="md:grid grid-cols-2 h-96 w-full">
+        <div className="p-5 md:p-10 h-full">
+          <div
+            className="bg-white rounded-lg shadow-2xl h-full p-7 group"
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+          >
+            <div className="border border-dashed border-blue-300 rounded-lg h-full">
+              <div className="relative h-24 mt-10">
+                <Image
+                  src="/file.svg"
+                  alt="Picture of file sharing"
+                  fill
+                  className="z-20"
+                />
+                <Image
+                  src="/file.svg"
+                  alt="Picture of file sharing"
+                  fill
+                  className="upload-icon-left"
+                />
+                <Image
+                  src="/file.svg"
+                  alt="Picture of file sharing"
+                  fill
+                  className="upload-icon-right"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="relative">
+          <Image src="/undraw-upload.svg" alt="Picture of file sharing" fill />
+        </div>
       </div>
     </section>
   );

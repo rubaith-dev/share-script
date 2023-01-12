@@ -5,3 +5,11 @@
 body{
   background-color:#ECF5FE;
 }
+
+.upload-icon-left{
+  @apply group-hover:-rotate-[20deg] group-hover:scale-90 group-hover:-translate-x-7 group-hover:translate-y-1 z-10 transition ease-in-out duration-300
+}
+
+.upload-icon-right{
+  @apply group-hover:rotate-[20deg] group-hover:scale-90 group-hover:translate-x-7 group-hover:translate-y-1 z-10 transition ease-in-out duration-300
+}
