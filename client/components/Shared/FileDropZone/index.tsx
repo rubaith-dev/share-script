@@ -17,18 +17,16 @@ const FileDropZone = (props: Props) => {
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     let inputFiles = e.dataTransfer.files;
-    dispatch({ type: ACTIONS.SET_FILES, payload: formatFileList(inputFiles) });
+    setFilesListInLocalState(inputFiles);
   };
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     let inputFiles = e.target.files;
-    let fileList: FileType[] = [];
-    if (inputFiles && inputFiles.length > 0) {
-      dispatch({ type: ACTIONS.SET_FILES, payload: fileList });
-    }
+    if (inputFiles?.length) setFilesListInLocalState(inputFiles);
   };
 
-  const formatFileList = (fileList: FileList) => {
+  const setFilesListInLocalState = (fileList: FileList) => {
     const formattedList: any = [];
     Object.values(fileList).map((file, index) => {
       let id = `${file.size}.${Date.now()}.${file.name.replaceAll(" ", "_")}`;
@@ -36,7 +34,7 @@ const FileDropZone = (props: Props) => {
       formattedList.push({ file, progress: 0, id });
     });
 
-    return formattedList;
+    dispatch({ type: ACTIONS.SET_FILES, payload: formattedList });
   };
 
   return (
