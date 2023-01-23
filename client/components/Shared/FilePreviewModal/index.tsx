@@ -3,8 +3,6 @@ import { FileUploadContext } from "@/utils/reducers/index.r";
 import { Line, Circle } from "rc-progress";
 import { ACTIONS } from "../../../utils/types/index";
 import axios from "axios";
-import {Buffer} from "buffer"
-
 
 type Props = { className: string };
 
@@ -12,64 +10,30 @@ const FilePreviewModal = ({ className }: Props) => {
   const { files, dispatch } = useContext(FileUploadContext);
 
   const handleFileChange = async () => {
-    const CHUNK_SIZE = 5* 1024*1024; // Chunk size (5MB in this example)
-
     files?.map(async ({ file, progress, id }) => {
       if (!file) {
         return;
       }
 
-      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-
-      const start = 0;
-      const end = Math.min(CHUNK_SIZE, file.size);
-
-      const chunk = file.slice(start, end);
-
       const formData = new FormData();
-      formData.append("data", chunk);
+      formData.append("data", file);
       formData.append("fileName", file.name);
       formData.append("fileSize", String(file.size));
-      formData.append("totalChunks", String(totalChunks));
 
       const response = await axios.post(
         "http://localhost:8080/upload/initiate",
-        formData
+        formData,
+        {
+          onUploadProgress: (data) => {
+            dispatch({
+              type: ACTIONS.SET_PROGRESS,
+              payload: { id, progress: data.progress },
+            });
+          },
+        }
       );
       console.log(response);
-
-      let uploadedChunks = 0;
-      // for (let index = 0; index < totalChunks; index++) {
-      //   const start = index * CHUNK_SIZE;
-      //   const end = Math.min((index + 1) * CHUNK_SIZE, file.size);
-
-      //   const chunk = file.slice(start, end);
-
-      //   const formData = new FormData();
-      //   formData.append("fileName", file.name);
-      //   formData.append("index", String(index));
-      //   formData.append("totalChunks", String(totalChunks));
-      //   formData.append("data", chunk);
-
-      //   // try {
-      //   //   await axios.post("http://localhost:8000/upload", formData);
-      //   //   uploadedChunks++;
-      //   //   dispatch({
-      //   //     type: ACTIONS.SET_PROGRESS,
-      //   //     payload: { id, progress: Number(uploadedChunks / totalChunks) },
-      //   //   });
-      //   // } catch (error) {
-      //   //   console.error(`Failed to upload chunk ${index + 1}.`, error);
-      //   }
-      // }
     });
-
-    // try {
-    //   await Promise.all(promises);
-    //   console.log("All chunks uploaded successfully.");
-    // } catch (error) {
-    //   console.error("Failed to upload chunks.", error);
-    // }
   };
 
   return (

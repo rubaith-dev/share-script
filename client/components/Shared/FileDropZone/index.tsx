@@ -3,11 +3,12 @@ import Image from "next/image";
 import { FileType, ACTIONS } from "../../../utils/types/index";
 import { FileUploadContext } from "@/utils/reducers/index.r";
 
-
 type Props = {};
 
 const FileDropZone = (props: Props) => {
   const { files, dispatch } = useContext(FileUploadContext);
+
+  console.log(files);
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -16,24 +17,26 @@ const FileDropZone = (props: Props) => {
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     let inputFiles = e.dataTransfer.files;
-    let fileList: FileType[] = [];
-    if (inputFiles && inputFiles.length > 0) {
-      Object.values(inputFiles).map((file) => {
-        fileList.push({ file, progress: 0, id: fileList.length });
-      });
-      dispatch({ type: ACTIONS.SET_FILES, payload: fileList });
-    }
+    dispatch({ type: ACTIONS.SET_FILES, payload: formatFileList(inputFiles) });
   };
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     let inputFiles = e.target.files;
     let fileList: FileType[] = [];
     if (inputFiles && inputFiles.length > 0) {
-      Object.values(inputFiles).map((file, index) =>
-        fileList.push({ file, progress: 0, id: index + 1 })
-      );
       dispatch({ type: ACTIONS.SET_FILES, payload: fileList });
     }
+  };
+
+  const formatFileList = (fileList: FileList) => {
+    const formattedList: any = [];
+    Object.values(fileList).map((file, index) => {
+      let id = `${file.size}.${Date.now()}.${file.name.replaceAll(" ", "_")}`;
+
+      formattedList.push({ file, progress: 0, id });
+    });
+
+    return formattedList;
   };
 
   return (
@@ -79,7 +82,7 @@ const FileDropZone = (props: Props) => {
             multiple
             id="file-upload"
             hidden
-            onChange={onChange} 
+            onChange={onChange}
           />
 
           {/* <Loader /> */}
