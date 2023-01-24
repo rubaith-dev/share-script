@@ -8,7 +8,8 @@ type Props = {};
 const FileDropZone = (props: Props) => {
   const { files, dispatch } = useContext(FileUploadContext);
 
-  console.log(files);
+  console.log(files)
+
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();

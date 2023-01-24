@@ -10,30 +10,34 @@ const FilePreviewModal = ({ className }: Props) => {
   const { files, dispatch } = useContext(FileUploadContext);
 
   const handleFileChange = async () => {
-    files?.map(async ({ file, progress, id }) => {
+    for (const { file, progress, id } of files) {
       if (!file) {
-        return;
+        continue;
       }
-
+  
       const formData = new FormData();
       formData.append("data", file);
       formData.append("fileName", file.name);
       formData.append("fileSize", String(file.size));
-
-      const response = await axios.post(
-        "http://localhost:8080/upload/initiate",
-        formData,
-        {
-          onUploadProgress: (data) => {
-            dispatch({
-              type: ACTIONS.SET_PROGRESS,
-              payload: { id, progress: data.progress },
-            });
-          },
-        }
-      );
-      console.log(response);
-    });
+  
+      try {
+        const response = await axios.post(
+          "http://localhost:8080/upload/initiate",
+          formData,
+          {
+            onUploadProgress: (data) => {
+              dispatch({
+                type: ACTIONS.SET_PROGRESS,
+                payload: { id, progress: data.progress },
+              });
+            },
+          }
+        );
+        console.log(response);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   return (
