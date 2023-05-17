@@ -1,22 +1,43 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { FileUploadContext, FileUploadContextType } from "@/pages";
+import { Line, Circle } from "rc-progress";
 
 type Props = { className: string };
 
 const FilePreviewModal = ({ className }: Props) => {
-  const { files,setFiles } = useContext(FileUploadContext);
+  const { files, setFiles } = useContext(FileUploadContext);
+  const [progressbar, setProgressbar] = useState(100);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setProgressbar((prevProgress) => {
+  //       const newProgress = prevProgress + 10;
+  //       return newProgress > 100 ? 0 : newProgress;
+  //     });
+  //   }, 500); // Adjust the interval time (in milliseconds) to control the speed of the progress bar animation
+
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <div
-      className={`${className} w-1/4 h-full bg-black opacity-90 z-30 rounded-l-md text-white overflow-y-auto`}
+      className={`${className} w-1/4 h-full bg-gray-900 z-30 text-white overflow-y-auto`}
     >
-      <p onClick={()=>setFiles([])}>Clear</p>
+      <p onClick={() => setFiles([])}>Clear</p>
       <div className="w-full flex flex-col p-5 gap-4">
         {files.map((file, index) => {
           return (
-            <p key={index} className="border p-3 w-full rounded-md break-words truncate">
-              {file.name}
-            </p>
+            <div key={index} className="flex">
+              <p className="p-3 w-full rounded-md break-words truncate">
+                {file.name}
+              </p>
+              <div className="w-12 h-12 grid place-items-center relative">
+                <Circle percent={progressbar} strokeWidth={8} strokeColor="#D3D3D3" transition="all 1s ease" />
+                <div className="absolute text-[11px]">
+                  {progressbar}%
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
