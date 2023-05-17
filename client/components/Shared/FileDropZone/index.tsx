@@ -9,11 +9,54 @@ import React, {
 import Image from "next/image";
 // import Loader from "@/components/Shared/Loader";
 import { FileUploadContext, FileUploadContextType } from "@/pages";
+import axios from 'axios'
 
 type Props = {};
 
 const FileDropZone = (props: Props) => {
   const { files, setFiles } = useContext(FileUploadContext);
+
+  const handleFileChange = async () => {
+    const CHUNK_SIZE = 5 * 1024 * 1024; // Chunk size (5MB in this example)
+
+    const promises = files.map(async (file)=>{
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      const uploadPromises = Array.from({length : totalChunks }, async (_, index) =>{
+        const start = index * CHUNK_SIZE;
+        const end = Math.min((index + 1) * CHUNK_SIZE, file.size);
+
+        const chunk = file.slice(start, end);
+
+        const formData = new FormData();
+        formData.append("fileName", file.name);
+        formData.append("index", String(index));
+        formData.append("totalChunks", String(totalChunks));
+        formData.append("data", chunk);
+
+        try {
+          await axios.post("http://localhost:8000/upload", formData);
+          console.log(`Chunk ${index + 1} uploaded successfully.`);
+        } catch (error) {
+          console.error(`Failed to upload chunk ${index + 1}.`, error);
+        }
+      } )
+
+      return Promise.race(uploadPromises)
+    })
+
+    try {
+      await Promise.all(promises);
+      console.log("All chunks uploaded successfully.");
+    } catch (error) {
+      console.error("Failed to upload chunks.", error);
+    }
+
+    console.log("File splitting completed");
+  };
+
+  useEffect(() => {
+    handleFileChange(); // Call handleFileChange whenever files state changes
+  }, [files]);
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -37,8 +80,6 @@ const FileDropZone = (props: Props) => {
       setFiles(fileList);
     }
   };
-
- 
 
   return (
     <div className="p-5 md:p-10 h-full">
