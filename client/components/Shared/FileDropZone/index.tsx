@@ -2,68 +2,12 @@ import React, { DragEvent, useEffect, useContext, ChangeEvent } from "react";
 import Image from "next/image";
 import { FileType, ACTIONS } from "../../../utils/types/index";
 import { FileUploadContext } from "@/utils/reducers/index.r";
-import axios from "axios";
+
 
 type Props = {};
 
 const FileDropZone = (props: Props) => {
   const { files, dispatch } = useContext(FileUploadContext);
-
-  const handleFileChange = async () => {
-    const CHUNK_SIZE = 5 * 1024 * 1024; // Chunk size (5MB in this example)
-
-    const promises = files?.map(async ({ file, progress, id }) => {
-      if (!file) {
-        return;
-      }
-
-      
-
-      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-      let uploadedChunks = 0;
-      for (let index = 0; index < totalChunks; index++) {
-
-        const start = index * CHUNK_SIZE;
-        const end = Math.min((index + 1) * CHUNK_SIZE, file.size);
-
-        const chunk = file.slice(start, end);
-
-        const formData = new FormData();
-        formData.append("fileName", file.name);
-        formData.append("index", String(index));
-        formData.append("totalChunks", String(totalChunks));
-        formData.append("data", chunk);
-
-        try {
-          await axios.post("http://localhost:8000/upload", formData);
-          uploadedChunks++;
-          dispatch({
-            type: ACTIONS.SET_PROGRESS,
-            payload: { id, progress: Number(uploadedChunks / totalChunks) },
-          });
-
-          console.log(
-            `Chunk ${index + 1} of ${totalChunks} uploaded successfully.`
-          );
-        } catch (error) {
-          console.error(`Failed to upload chunk ${index + 1}.`, error);
-        }
-      }
-    });
-
-    try {
-      await Promise.all(promises);
-      console.log("All chunks uploaded successfully.");
-    } catch (error) {
-      console.error("Failed to upload chunks.", error);
-    }
-
-    console.log("File splitting completed");
-  };
-
-  useEffect(() => {
-    handleFileChange(); // Call handleFileChange whenever files state changes
-  }, [files]);
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -74,8 +18,8 @@ const FileDropZone = (props: Props) => {
     let inputFiles = e.dataTransfer.files;
     let fileList: FileType[] = [];
     if (inputFiles && inputFiles.length > 0) {
-      Object.values(inputFiles).map((file, index) => {
-        return fileList.push({ file, progress: 0, id: index + 1 });
+      Object.values(inputFiles).map((file) => {
+        fileList.push({ file, progress: 0, id: fileList.length });
       });
       dispatch({ type: ACTIONS.SET_FILES, payload: fileList });
     }
