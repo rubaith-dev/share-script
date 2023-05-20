@@ -1,26 +1,44 @@
-import express from 'express';
-import { Request } from 'express';
+import express from "express";
+import { Request } from "express";
 const router = express.Router();
-const multer = require('multer');
+const cloudinary = require("cloudinary");
 
-// Create a multer storage configuration
-const storage = multer.memoryStorage();
+cloudinary.config({
+  cloud_name: "share-script",
+  api_key: "471657193265582",
+  api_secret: "j8Z1Rq2oZp0RgFfKvMVYYdQBMpw",
+});
 
-// Create a multer instance with the storage configuration
-const upload = multer({ storage });
+router.post("/upload/initiate", async (req, res) => {
+  
+  console.log(req.body)
 
-router.post("/upload",upload.single('data'), (req:Request,res)=>{
-    const { fileName, index, totalChunks } = req.body;
-  const chunk = req.file?.buffer;
+  // const uploadOptions = {
+  //   resource_type: "video",
+  //   chunk_size: Math.ceil(fileSize / totalChunks),
+  // };
+
+  // try {
+  //   let result = await cloudinary.uploader.upload_large(null, uploadOptions);
+  //   let uploadId = await result.upload_id;
+
+  //   res.json({ uploadId });
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).json({ error: "Failed to initiate upload" });
+  // }
+});
+
+router.post("/upload", async (req: Request, res) => {
+  const { fileName, index, totalChunks } = req.body;
+  const chunk = req.file;
 
   console.log(`Received chunk for file ${fileName}`);
   console.log(`Chunk index: ${index}`);
   console.log(`Total chunks: ${totalChunks}`);
   console.log(`Chunk data:`, chunk);
 
-  // Logic for processing the chunk and saving it
+  res.sendStatus(200);
+});
 
-  res.sendStatus(200); 
-})
-
-export default router
+export default router;
