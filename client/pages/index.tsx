@@ -22,11 +22,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* <FilePreviewModal
+        <FilePreviewModal
           className={`absolute top-0 right-0 transform transition-all duration-500  ${
-            state.length > 0 ? "translate-x-0" : "translate-x-0"
+            files.length > 0 ? "translate-x-0" : "translate-x-0"
           }`}
-        /> */}
+        />
       </div>
     </FileUploadContext.Provider>
   );

@@ -13,7 +13,13 @@ export function reducer(files: FileType[], action: FileActionType) {
       return [...files, ...action.payload];
 
     case ACTIONS.SET_PROGRESS:
-      console.log(files)
+      return files.map((file) => {
+        if (action.payload.id === file?.id) {
+          return { ...file, progress: (action.payload.progress*100).toFixed(0) };
+        } else {
+          return file;
+        }
+      });
     default:
       return files;
   }
