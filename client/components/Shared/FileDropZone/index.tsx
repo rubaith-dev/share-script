@@ -79,7 +79,7 @@ const FileDropZone = (props: Props) => {
             multiple
             id="file-upload"
             hidden
-            onChange={onChange}
+            onChange={onChange} 
           />
 
           {/* <Loader /> */}
