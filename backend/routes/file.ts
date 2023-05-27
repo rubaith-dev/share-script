@@ -1,48 +1,57 @@
 import express from "express";
 import { Request } from "express";
 const router = express.Router();
-const multer = require("multer");
-import fs from "fs";
-import path from "path";
-import S3 from "aws-sdk/clients/s3";
+import * as dotenv from "dotenv";
+import multer from "multer";
+import cloudinary from "cloudinary";
+dotenv.config();
 
-const bucketName = process.env.AWS_BUCKET_NAME;
-const region = process.env.AWS_BUCKET_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_KEY;
-
-const s3 = new S3({
-  region,
-  accessKeyId,
-  secretAccessKey,
+cloudinary.v2.config({
+  api_secret: "j8Z1Rq2oZp0RgFfKvMVYYdQBMpw",
+  api_key: "471657193265582",
+  cloud_name: "dj75yn9h8",
 });
 
-const upload = multer();
+const upload = multer( );
 
 router.post("/upload/initiate", upload.single("data"), async (req, res) => {
-  console.log(req.file, bucketName)
-  if (req.file?.buffer) {
-    fs.appendFileSync(
-      path.join(__dirname, "../upload", req.body.fileName),
-      req.file?.buffer
-    );
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.v2.uploader.upload_stream(
+        { resource_type: 'auto', folder: 'foo' },
+        (error, result) => {
+          if (error) {
+            console.error('Upload error:', error);
+            reject(error);
+          } else {
+            console.log('Public ID:', result?.public_id);
+            console.log('URL:', result?.secure_url);
+            resolve(result);
+          }
+        }
+      );
+
+      uploadStream.end(req.file?.buffer);
+    });
+
+    console.log(result);
+    res.send(req.file?.filename);
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).send('Upload failed');
   }
 
-  const fileStream = fs.createReadStream(
-    path.join(__dirname, "../upload", req.body.fileName)
-  );
+  // let fileStream = fs.createReadStream(
+  //   path.resolve(
+  //     "/Users/rubaith/Documents/Personal projects/Fullstack/share-script/backend" +
+  //       "/upload" +
+  //       "/9cc25f9612537beeb52a8080ed3d93e0"
+  //   ), {highWaterMark:10*1024*1024}
+  // );
 
-  const uploadParams = {
-    Bucket: "share-script" ,
-    Body: fileStream,
-    Key: req.body.fileName,
-  };
-  // @ts-ignore
-  let response = await s3.upload(uploadParams).promise();
-
-  console.log(response);
-
-  res.send("hello hi bye");
+  // fileStream.on("data", (chunk)=>{
+  //   console.log(chunk)
+  // })
 });
 
 router.post("/upload", async (req: Request, res) => {
